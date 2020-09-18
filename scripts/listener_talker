@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+import asyncio
+
+import aioros
+from std_msgs.msg import String
+
+
+async def spin_talker(nh: aioros.NodeHandle):
+    await nh.init()
+    publisher: aioros.Publisher = await nh.create_publisher(
+        'chatter',
+        String)
+    while True:
+        publisher.publish(String(data='Hello world'))
+        await asyncio.sleep(0.1)
+
+
+async def spin_listener(nh: aioros.NodeHandle):
+    await nh.init()
+    await nh.create_subscription('chatter', String, print)
+
+
+def main():
+    loop = asyncio.get_event_loop()
+    talker = aioros.NodeHandle('talker')
+    listener = aioros.NodeHandle('listener')
+    try:
+        loop.create_task(spin_listener(listener))
+        loop.create_task(spin_talker(talker))
+        loop.run_forever()
+    except KeyboardInterrupt as e:
+        loop.run_until_complete(
+            asyncio.gather(listener.close(),
+                           talker.close()))
+        loop.stop()
+
+
+if __name__ == '__main__':
+    main()
