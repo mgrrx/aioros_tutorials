@@ -4,7 +4,7 @@ project(aioros_tutorials)
 find_package(catkin REQUIRED)
 catkin_package()
 
-install(
+catkin_install_python(
     PROGRAMS
      scripts/listener
      scripts/talker
